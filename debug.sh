@@ -4,4 +4,4 @@ if [[ -z ${MAVEN_OPTS} ]]; then
     MAVEN_OPTS="-Xms256m -Xmx2G"
 fi
 echo "MAVEN_OPTS is set to '$MAVEN_OPTS'";
-mvn clean install alfresco:run
+mvnDebug clean install alfresco:run
