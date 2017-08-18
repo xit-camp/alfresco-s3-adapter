@@ -16,74 +16,69 @@ import java.io.OutputStream;
 import java.nio.channels.Channels;
 import java.nio.channels.WritableByteChannel;
 
-
 public class S3ContentWriter extends AbstractContentWriter {
 
-    private static final Log logger = LogFactory.getLog(S3ContentWriter.class);
+  private static final Log logger = LogFactory.getLog(S3ContentWriter.class);
 
-    private TransferManager transferManager;
-    private AmazonS3 client;
-    private String key;
-    private String bucketName;
-    private File tempFile;
-    private long size;
+  private TransferManager transferManager;
+  private AmazonS3 client;
+  private String key;
+  private String bucketName;
+  private File tempFile;
+  private long size;
 
-    public S3ContentWriter(String bucketName, String key, String contentUrl, ContentReader existingContentReader, AmazonS3 client, TransferManager transferManager) {
-        super(contentUrl, existingContentReader);
-        this.key = key;
-        this.client = client;
-        this.transferManager = transferManager;
-        this.bucketName = bucketName;
-        addListener(new S3StreamListener(this));
+  public S3ContentWriter(String bucketName, String key, String contentUrl, ContentReader existingContentReader, AmazonS3 client, TransferManager transferManager) {
+    super(contentUrl, existingContentReader);
+    this.key = key;
+    this.client = client;
+    this.transferManager = transferManager;
+    this.bucketName = bucketName;
+    addListener(new S3StreamListener(this));
+  }
+
+  @Override
+  protected ContentReader createReader() throws ContentIOException {
+    return new S3ContentReader(key, getContentUrl(), client, bucketName);
+  }
+
+  @Override
+  protected WritableByteChannel getDirectWritableChannel() throws ContentIOException {
+    try {
+
+      String uuid = GUID.generate();
+      logger.debug("S3ContentWriter Creating Temp File: uuid=" + uuid);
+      tempFile = TempFileProvider.createTempFile(uuid, ".bin");
+      OutputStream os = new FileOutputStream(tempFile);
+      logger.debug("S3ContentWriter Returning Channel to Temp File: uuid=" + uuid);
+      return Channels.newChannel(os);
+    } catch (Throwable e) {
+      throw new ContentIOException("S3ContentWriter.getDirectWritableChannel(): Failed to open channel. " + this, e);
     }
 
-    @Override
-    protected ContentReader createReader() throws ContentIOException {
-        return new S3ContentReader(key, getContentUrl(), client, bucketName);
-    }
+  }
 
-    @Override
-    protected WritableByteChannel getDirectWritableChannel() throws ContentIOException {
+  @Override
+  public long getSize() {
+    return this.size;
+  }
 
-        try
-        {
+  public void setSize(long size) {
+    this.size = size;
+  }
 
-            String uuid = GUID.generate();
-            logger.debug("S3ContentWriter Creating Temp File: uuid="+uuid);
-            tempFile = TempFileProvider.createTempFile(uuid, ".bin");
-            OutputStream os = new FileOutputStream(tempFile);
-            logger.debug("S3ContentWriter Returning Channel to Temp File: uuid="+uuid);
-            return Channels.newChannel(os);
-        }
-        catch (Throwable e)
-        {
-            throw new ContentIOException("S3ContentWriter.getDirectWritableChannel(): Failed to open channel. " + this, e);
-        }
+  public TransferManager getTransferManager() {
+    return transferManager;
+  }
 
-    }
+  public String getBucketName() {
+    return bucketName;
+  }
 
-    @Override
-    public long getSize() {
-        return this.size;
-    }
+  public String getKey() {
+    return key;
+  }
 
-    public void setSize(long size) {
-        this.size = size;
-    }
-
-    public TransferManager getTransferManager() {
-        return transferManager;
-    }
-
-    public String getBucketName() {
-        return bucketName;
-    }
-
-    public String getKey() {
-        return key;
-    }
-
-    public File getTempFile() {
-        return tempFile;
-    }
+  public File getTempFile() {
+    return tempFile;
+  }
 }
