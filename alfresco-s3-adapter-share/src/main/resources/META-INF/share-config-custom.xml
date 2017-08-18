@@ -25,7 +25,9 @@ Note. Any configuration related to the whole Share.war webapp
         </field-visibility>
         <appearance>
           <!-- Store Selector -->
-          <field id="cm:storeName" label="Store Name" description="Content Store Name" />
+          <field id="cm:storeName" label="Store Name" description="Content Store Name">
+            <control template="/org/alfresco/components/form/controls/textfield.ftl" />
+          </field>
         </appearance>
       </form>
     </forms>

@@ -19,14 +19,14 @@
 
 <beans>
   
-  <!-- Some sample configurations -->
+  <!-- Some sample configurations
   <bean id="contentService" parent="baseContentService">
     <property name="store">
-      <ref bean="storeSelectorContentStore" />
+      <ref bean="storeDefaultAndS3SelectorContentStore" />
     </property>
   </bean>
-  
-  <!-- Add the other stores to the list of stores for cleaning -->
+   -->
+  <!-- Add the other stores to the list of stores for cleaning 
    <bean id="eagerContentStoreCleaner" class="org.alfresco.repo.content.cleanup.EagerContentStoreCleaner" init-method="init">
       <property name="eagerOrphanCleanup" >
          <value>${system.content.eagerOrphanCleanup}</value>
@@ -41,5 +41,22 @@
          <ref bean="deletedContentBackupListeners" />
       </property>
    </bean>
+  -->
   
+    <!--
+  <bean id="storeDefaultAndS3SelectorContentStore" parent="storeSelectorContentStoreBase">
+    <property name="defaultStoreName">
+      <value>default</value>
+    </property>
+    <property name="storesByName">
+      <map>
+        <entry key="default">
+          <ref bean="fileContentStore" />
+        </entry>
+        <entry key="s3">
+          <ref bean="redpill.s3ContentStore" />
+        </entry>
+      </map>
+    </property>
+  </bean>-->
 </beans>
