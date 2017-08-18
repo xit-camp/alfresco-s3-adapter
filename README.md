@@ -1,11 +1,21 @@
 # alfresco-s3-adapter
-Alfresco AMP Module for S3 Backed Storage
+Alfresco S3 Adapter
 
- * Migrated from the `alfresco-cloud-store` project at https://code.google.com/p/alfresco-cloud-store/
- * Updated to use the latest AWS S3 SDK, and the latest Alfresco 5.0.x API
- * This should not be considered "production ready" it has not been battle tested
+ * Forked from https://github.com/rmberg/alfresco-s3-adapter which originally was migrated from the `alfresco-cloud-store` project at https://code.google.com/p/alfresco-cloud-store/.
+ * Apache License 2.0
+ * Uses Amazon SDK 1.x
+ * Uses Alfresco SDK 3.0 and tested with Alfresco 5.2
+ * This module is not yet production ready
  * Pull Requests / Issues / Contributions are welcomed!
  
+
+TODO
+
+S3 mocking for testing: https://github.com/findify/s3mock
+
+Below this line are old build instructions that should be updated
+
+
 Build Instructions
 
  * After cloning the project, run `mvn clean install` to download dependencies and build the project
