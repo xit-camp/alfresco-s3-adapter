@@ -7,6 +7,7 @@ Alfresco S3 Adapter
  * Uses Alfresco SDK 3.0 and tested with Alfresco 5.2
  * This module is not yet production ready
  * Pull Requests / Issues / Contributions are welcomed!
+ * Use Findify s3mock
  
 
 TODO
@@ -22,7 +23,7 @@ Build Instructions
 
 Installation / Configuration
 
- * After installing the `alfresco-s3.amp` package you will need to add some properties to your `alfresco-global.properties` file:
+ * After installing the `alfresco-s3-adapter.amp` package you will need to add some properties to your `alfresco-global.properties` file:
  
 ```
 # Your AWS credentials
@@ -38,14 +39,18 @@ aws.regionName=us-east-1
 # The S3 bucket name to use as the content store
 aws.s3.bucketName=
 
-# The location on local storage to be used as the cache
-dir.cachedcontent=/temp/cachedcontent
+# The endpoint url if other than AWS (for other S3-compatible vendors)
+aws.s3.endpoint=
 
 # The relative path (S3 KEY) within the bucket to use as the content store (useful if the bucket is not dedicated to alfresco content)
-dir.contentstore=/alfresco/contentstore
+aws.s3.rootDirectory=/alfresco/contentstore
 
-# The relative path (S3 KEY) within the bucket to use as the deleted content store
-dir.contentstore.deleted=/alfresco/contentstore.deleted
+# The cache size
+defaultS3QuotaManager.maxUsageMB=4096
+# The max file size in MB to store in cache 0 means no limit
+defaultS3QuotaManager.maxFileSizeMB=0
+# Content cache dir
+defaultS3ContentCache.cachedcontent=/tmp/cachedcontent
 ```
  
  
