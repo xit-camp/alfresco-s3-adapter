@@ -2,7 +2,6 @@ package org.redpill.alfresco.s3;
 
 import com.amazonaws.services.s3.transfer.TransferManager;
 import com.amazonaws.services.s3.transfer.Upload;
-import com.amazonaws.services.s3.transfer.model.UploadResult;
 import org.alfresco.service.cmr.repository.ContentIOException;
 import org.alfresco.service.cmr.repository.ContentStreamListener;
 import org.apache.commons.logging.Log;

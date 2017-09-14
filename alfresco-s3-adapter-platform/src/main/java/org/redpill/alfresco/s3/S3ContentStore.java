@@ -5,14 +5,9 @@ import com.amazonaws.auth.AWSStaticCredentialsProvider;
 import com.amazonaws.auth.AnonymousAWSCredentials;
 import com.amazonaws.auth.BasicAWSCredentials;
 import com.amazonaws.auth.profile.ProfileCredentialsProvider;
-import com.amazonaws.client.builder.AwsClientBuilder;
 import com.amazonaws.client.builder.AwsClientBuilder.EndpointConfiguration;
-import com.amazonaws.services.s3.AmazonS3;
-import com.amazonaws.services.s3.AmazonS3Builder;
-import com.amazonaws.services.s3.AmazonS3Client;
 import com.amazonaws.services.s3.AmazonS3ClientBuilder;
 import com.amazonaws.services.s3.AmazonS3;
-import com.amazonaws.services.s3.AmazonS3Client;
 import com.amazonaws.services.s3.transfer.TransferManager;
 import org.alfresco.repo.content.AbstractContentStore;
 import org.alfresco.repo.content.ContentStore;
@@ -67,47 +62,12 @@ public class S3ContentStore extends AbstractContentStore
     return new S3ContentReader(key, contentUrl, s3Client, bucketName);
 
   }
-  
+
   public AmazonS3 getS3Client() {
     return s3Client;
   }
 
   public void init() {
-    /*
-    AWSCredentials credentials = null;
-
-    if (StringUtils.isNotBlank(this.accessKey) && StringUtils.isNotBlank(this.secretKey)) {
-
-      logger.debug("Found credentials in properties file");
-      credentials = new BasicAWSCredentials(this.accessKey, this.secretKey);
-
-    } else {
-      try {
-        logger.debug("AWS Credentials not specified in properties, will fallback to credentials provider");
-        credentials = new ProfileCredentialsProvider().getCredentials();
-      } catch (Exception e) {
-        logger.error("Can not find AWS Credentials");
-      }
-    }
-
-    s3Client = new AmazonS3Client(credentials);
-    if (!"".equals(endpoint)) {
-      logger.debug("Using custom endpoint" + endpoint);
-      s3Client.setEndpoint(endpoint);
-    } else if (logger.isDebugEnabled()) {
-      Region region = Region.getRegion(Regions.fromName(this.regionName));
-      logger.debug("Using default Amazon S3 endpoint with region " + region);
-      s3Client.setRegion(region);
-    }
-    
-     */
-
- /* AWS S3 client setup.
-     *  withPathStyleAccessEnabled(true) trick is required to overcome S3 default 
-     *  DNS-based bucket access scheme
-     *  resulting in attempts to connect to addresses like "bucketname.localhost"
-     *  which requires specific DNS setup.
-     */
 
     AWSCredentials credentials = null;
 
@@ -125,7 +85,7 @@ public class S3ContentStore extends AbstractContentStore
         credentials = new AnonymousAWSCredentials();
       }
     }
-    
+
     if (!"".equals(endpoint)) {
       logger.debug("Using custom endpoint" + endpoint);
       EndpointConfiguration endpointConf = new EndpointConfiguration(endpoint, regionName);
@@ -212,7 +172,7 @@ public class S3ContentStore extends AbstractContentStore
     if (StringUtils.isBlank(contentUrl)) {
       contentUrl = createNewUrl();
     }
-    
+
     String key = makeS3Key(contentUrl);
 
     return new S3ContentWriter(bucketName, key, contentUrl, existingContentReader, s3Client, transferManager);
