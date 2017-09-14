@@ -5,5 +5,9 @@ if [[ -z ${MAVEN_OPTS} ]]; then
 fi
 
 #MAVEN_OPTS="$MAVEN_OPTS -Djavax.net.ssl.trustStore=./java_cacerts"
+
+# Read hotswap settings from home folder. Create a file called hotswap.sh in your home dir with the following contents:
+# export MAVEN_OPTS="$MAVEN_OPTS -XXaltjvm=dcevm -javaagent:/home/<homedir>/hotswap-agent.jar"
+. ~/hotswap.sh
 echo "MAVEN_OPTS is set to '$MAVEN_OPTS'";
 mvn clean install alfresco:run

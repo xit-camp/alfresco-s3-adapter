@@ -7,10 +7,14 @@
   <name>Alfresco S3 Adapter</name>
   <description>All-In-One (AIO) project for SDK 3.0</description>
   <packaging>pom</packaging>
-
+  <parent>
+    <groupId>com.redpill-linpro.alfresco</groupId>
+    <artifactId>alfresco-base</artifactId>
+    <version>3.0.1</version>
+  </parent>
   <properties>
     <!-- Alfresco Maven Plugin version to use -->
-    <alfresco.sdk.version>3.0.0</alfresco.sdk.version>
+    <alfresco.sdk.version>3.0.1-SNAPSHOT</alfresco.sdk.version>
 
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
@@ -33,11 +37,11 @@
     <!-- Alfresco Platform and Share webapp versions, these are the original Alfresco webapps that will be
     customized and then deployed and run by the tomcat maven plugin when
     executing for example $ mvn clean install alfresco:run -->
-    <alfresco.platform.version>5.2.1</alfresco.platform.version>
-    <alfresco.share.version>5.2.1</alfresco.share.version>
+    <alfresco.platform.version>5.2.e</alfresco.platform.version>
+    <alfresco.share.version>5.2.e</alfresco.share.version>
 
     <!-- Default is to run with a Community edition, change to 'enterprise' if using Enterprise edition -->
-    <maven.alfresco.edition>enterprise</maven.alfresco.edition>
+    <maven.alfresco.edition>community</maven.alfresco.edition>
 
     <!-- Alfresco Surf version, if you change Share version you might need to change Surf version -->
     <alfresco.surf.version>6.11</alfresco.surf.version>
@@ -50,8 +54,9 @@
     <env>local</env>
 
     <!-- Compile with Java 7, default is 5 -->
-    <maven.compiler.source>1.7</maven.compiler.source>
-    <maven.compiler.target>1.7</maven.compiler.target>
+    <maven.compiler.source>1.8</maven.compiler.source>
+    <maven.compiler.target>1.8</maven.compiler.target>
+    <rl.alfresco-test.version>3.0.1-SNAPSHOT</rl.alfresco-test.version>
   </properties>
 
   <!-- Libs used in Unit and Integration tests -->
@@ -152,6 +157,11 @@
         <artifactId>spring-surf-api</artifactId>
         <version>${alfresco.surf.version}</version>
         <scope>provided</scope>
+      </dependency>
+      <dependency>
+        <groupId>org.redpill-linpro.alfresco</groupId>
+        <artifactId>alfresco-test-repo</artifactId>
+        <version>${rl.alfresco-test.version}</version>
       </dependency>
     </dependencies>
   </dependencyManagement>
@@ -285,25 +295,25 @@
           <!-- We always need the Platform/Repo webapp - alfresco.war -->
           <enablePlatform>true</enablePlatform>
           <!-- Enable Solr webapp so we can use search -->
-          <enableSolr>true</enableSolr>
+          <enableSolr>false</enableSolr>
           <!-- We need Share webapp, so we got a UI for working with the Repo -->
-          <enableShare>true</enableShare>
+          <enableShare>false</enableShare>
           <!-- Enable the REST API Explorer -->
-          <enableApiExplorer>true</enableApiExplorer>
+          <enableApiExplorer>false</enableApiExplorer>
 
           <!--
               JARs and AMPs that should be overlayed/applied to the Platform/Repository WAR
               (i.e. alfresco.war)
           -->
           <platformModules>
-            <!-- Share Services will be ignored if you are on Platform earlier than 5.1 -->
-            <moduleDependency>
-              <groupId>${alfresco.groupId}</groupId>
-              <artifactId>alfresco-share-services</artifactId>
-              <version>${alfresco.share.version}</version>
-              <type>amp</type>
-            </moduleDependency>
-
+            <!-- Share Services will be ignored if you are on Platform earlier than 5.1
+                       <moduleDependency>
+                         <groupId>${alfresco.groupId}</groupId>
+                         <artifactId>alfresco-share-services</artifactId>
+                         <version>${alfresco.share.version}</version>
+                         <type>amp</type>
+                       </moduleDependency>
+            -->
             <!-- Bring in custom Modules -->
             <moduleDependency>
               <groupId>${project.groupId}</groupId>
@@ -311,19 +321,25 @@
               <version>${project.version}</version>
               <type>amp</type>
             </moduleDependency>
-            <!-- Bring in custom Modules -->
+            <!-- Bring in custom Modules
             <moduleDependency>
               <groupId>${project.groupId}</groupId>
               <artifactId>alfresco-s3-customer-test</artifactId>
               <version>${project.version}</version>
               <type>amp</type>
-            </moduleDependency>
+            </moduleDependency> -->
             <!-- Bring in the integration tests -->
             <moduleDependency>
               <groupId>${project.groupId}</groupId>
               <artifactId>integration-tests</artifactId>
               <version>${project.version}</version>
               <classifier>tests</classifier>
+            </moduleDependency>
+            <moduleDependency>
+              <groupId>${project.groupId}</groupId>
+              <artifactId>alfresco-s3-adapter-testdeps</artifactId>
+              <version>${project.version}</version>
+              <type>amp</type>
             </moduleDependency>
             
             <moduleDependency>
@@ -332,7 +348,16 @@
               <version>0.6</version>
               <type>amp</type>
             </moduleDependency>
-
+            <moduleDependency>
+              <groupId>org.redpill-linpro.alfresco</groupId>
+              <artifactId>alfresco-test-repo</artifactId>
+              <version>${rl.alfresco-test.version}</version>
+            </moduleDependency>
+            <moduleDependency>
+              <groupId>io.findify</groupId>
+              <artifactId>s3mock_2.12</artifactId>
+              <version>0.2.3</version>
+            </moduleDependency>
           </platformModules>
 
           <!--
@@ -400,6 +425,14 @@
   -->
   <repositories>
     <repository>
+      <id>redpill-linpro</id>
+      <url>https://maven.redpill-linpro.com/nexus/content/groups/public</url>
+      <snapshots>
+        <enabled>true</enabled>
+        <updatePolicy>daily</updatePolicy>
+      </snapshots>
+    </repository>
+    <repository>
       <id>alfresco-public</id>
       <url>https://artifacts.alfresco.com/nexus/content/groups/public</url>
     </repository>
@@ -434,7 +467,8 @@
   <modules>
     <module>alfresco-s3-adapter-platform</module>
     <module>alfresco-s3-adapter-share</module>
-    <module>customer-test</module>
+    <!--<module>customer-test</module>-->
     <module>integration-tests</module>
+    <module>alfresco-s3-adapter-testdeps</module>
   </modules>
 </project>
