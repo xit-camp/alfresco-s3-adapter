@@ -33,7 +33,7 @@
   </bean>
 
   <bean id="redpill.defaultS3CachingContentStoreCache" factory-bean="cacheFactory" factory-method="createCache">
-    <constructor-arg value="cache.redpill.defaultS3CachingContentStoreCache"/>
+    <constructor-arg value="cache.cachingContentStoreCache"/>
   </bean>
   <!-- The quota manager which manages the disk uage for the cache -->
   <bean id="redpill.defaultS3QuotaManager"
