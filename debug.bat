@@ -9,4 +9,4 @@ IF "%MAVEN_OPTS%" == "" (
 )
 ECHO MAVEN_OPTS is set to '%MAVEN_OPTS%'
 
-mvn clean install alfresco:run
+mvnDebug clean install alfresco:run
