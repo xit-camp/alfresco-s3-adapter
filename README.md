@@ -1,20 +1,17 @@
-# alfresco-s3-adapter
-Alfresco S3 Adapter
+# Alfresco S3 Adapter
+
+This project is meant to provide tools to use s3 as a storage solution for Alfresco. It can be configured to work as a main content store if you are a community user. If you are an enterprise customer you can configure it to work with content store selector or as a main content store.
+
+History
 
  * Forked from https://github.com/rmberg/alfresco-s3-adapter which originally was migrated from the `alfresco-cloud-store` project at https://code.google.com/p/alfresco-cloud-store/.
  * Apache License 2.0
  * Uses Amazon SDK 1.x
  * Uses Alfresco SDK 3.0 and tested with Alfresco 5.2
- * This module is not yet production ready
  * Pull Requests / Issues / Contributions are welcomed!
- * Use Findify s3mock
+ * Use Findify s3mock for testing
  
 
-TODO
-
-S3 mocking for testing: https://github.com/findify/s3mock
-
-Below this line are old build instructions that should be updated
 
 
 Build Instructions
