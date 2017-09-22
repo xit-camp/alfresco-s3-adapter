@@ -33,12 +33,12 @@ public class S3StreamListener implements ContentStreamListener {
 
     logger.debug("Writing to s3://" + writer.getBucketName() + "/" + writer.getKey());
     TransferManager transferManager = writer.getTransferManager();
+
     Upload upload = transferManager.upload(writer.getBucketName(), writer.getKey(), writer.getTempFile());
     //To have transactional consistency it is necessary to wait for the upload to go through before allowing the transaction to commit!
     try {
       upload.waitForUploadResult();
-      //TODO Here we have a chance to validate MD5 sum of the file by calculating md5 for the temp file and compare it to the Etag that the upload returns
-      // Ref: http://docs.aws.amazon.com/AmazonS3/latest/API/RESTObjectPUT.html
+
     } catch (Exception e) {
       throw new ContentIOException("S3StreamListener Failed to Upload File", e);
     } finally {
