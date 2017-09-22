@@ -2,7 +2,7 @@
 
 This project is meant to provide tools to use s3 as a storage solution for Alfresco. It can be configured to work as a main content store if you are a community user. If you are an enterprise customer you can configure it to work with content store selector or as a main content store.
 
-History
+## History
 
  * Forked from https://github.com/rmberg/alfresco-s3-adapter which originally was migrated from the `alfresco-cloud-store` project at https://code.google.com/p/alfresco-cloud-store/.
  * Apache License 2.0
@@ -11,16 +11,68 @@ History
  * Pull Requests / Issues / Contributions are welcomed!
  * Use Findify s3mock for testing
  
+## Build Instructions
 
+ * After cloning the project, run `mvn clean install` to download dependencies and build the project.
 
+## Installation
 
-Build Instructions
+ * This module does not work stand alone out of the box but will require further configuration. Either install it as an amp in your alfresco installation and configure it using spring xml files in shared/classes/extension/s3-override-context.xml.
+ * If you have your own amp project you can include the s3 module as a dependency.
+ 
+### Use as content store selector
+The following code snippet can be used to configure the module to work in an enterprise setup with a content store selector.
+ 
+ ```
+ <?xml version='1.0' encoding='UTF-8'?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+          http://www.springframework.org/schema/beans/spring-beans-3.0.xsd">
+  <!-- Change the default store to a content store selector-->
+  <bean id="contentService" parent="baseContentService">
+    <property name="store">
+      <ref bean="storeSelectorContentStore" />
+    </property>
+  </bean>
+  
+  <!-- Configure the content store selector to use the file store as a default store and s3 as a backup -->
+  <bean id="storeSelectorContentStore" parent="storeSelectorContentStoreBase">
+    <property name="defaultStoreName">
+      <value>default</value>
+    </property>
+    <property name="storesByName">
+      <map>
+        <entry key="default">
+          <ref bean="fileContentStore" />
+        </entry>
+        <entry key="s3main">
+          <ref bean="redpill.defaultCachedS3BackedContentStore" />
+        </entry>
+      </map>
+    </property>
+  </bean>
+</beans> 
+ ```
+ 
+### Use as a main content store
+The following code snippet can be used to configure the module to work as a caching content store backed by s3.
 
- * After cloning the project, run `mvn clean install` to download dependencies and build the project
+```
+<?xml version='1.0' encoding='UTF-8'?>
+<beans xmlns="http://www.springframework.org/schema/beans" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.0.xsd">
+  <!--  Caching Content Store -->
+  <bean id="fileContentStore" class="org.alfresco.repo.content.caching.CachingContentStore" init-method="init">
+    <property name="backingStore" ref="redpill.defaultS3ContentStore"/>
+    <property name="cache" ref="redpill.defaultS3ContentCache"/>
+    <property name="cacheOnInbound" value="${system.content.caching.cacheOnInbound}"/>
+    <property name="quota" ref="redpill.defaultS3QuotaManager" />
+  </bean>
+</beans> 
+```
 
-Installation / Configuration
-
- * After installing the `alfresco-s3-adapter.amp` package you will need to add some properties to your `alfresco-global.properties` file:
+## Configuration
+* After installing the package you will need to add some properties to your `alfresco-global.properties` file:
  
 ```
 # Your AWS credentials
