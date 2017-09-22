@@ -10,7 +10,7 @@
   <parent>
     <groupId>org.redpill-linpro.alfresco.s3</groupId>
     <artifactId>alfresco-s3-adapter</artifactId>
-    <version>1.0.0-SNAPSHOT</version>
+    <version>1.0.0</version>
   </parent>
 
   <properties>
