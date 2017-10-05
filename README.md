@@ -102,4 +102,11 @@ defaultS3QuotaManager.maxFileSizeMB=0
 defaultS3ContentCache.cachedcontent=/tmp/cachedcontent
 ```
  
- 
+## Troubleshooting ##
+Enable debug logging in log4j by adding these lines to your log4j.properties file
+
+```
+log4j.logger.org.redpill.alfresco.s3=trace
+log4j.logger.com.amazonaws.requestId=debug
+log4j.logger.com.amazonaws.request=debug
+``` 
