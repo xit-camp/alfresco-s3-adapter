@@ -1,5 +1,6 @@
 package org.redpill.alfresco.s3;
 
+import com.amazonaws.ClientConfiguration;
 import com.amazonaws.auth.AWSCredentials;
 import com.amazonaws.auth.AWSStaticCredentialsProvider;
 import com.amazonaws.auth.AnonymousAWSCredentials;
@@ -49,6 +50,7 @@ public class S3ContentStore extends AbstractContentStore
   private String regionName;
   private String rootDirectory;
   private String endpoint;
+  private String signatureVersion;
 
   @Override
   public boolean isWriteSupported() {
@@ -68,8 +70,12 @@ public class S3ContentStore extends AbstractContentStore
   }
 
   public void init() {
-
     AWSCredentials credentials = null;
+    ClientConfiguration clientConfiguration = new ClientConfiguration();
+    if (!StringUtils.isEmpty(signatureVersion)) {
+      logger.debug("Using client override for signatureVersion: " + signatureVersion);
+      clientConfiguration.setSignerOverride(signatureVersion);
+    }
 
     if (StringUtils.isNotBlank(this.accessKey) && StringUtils.isNotBlank(this.secretKey)) {
 
@@ -93,6 +99,7 @@ public class S3ContentStore extends AbstractContentStore
               .standard()
               .withEndpointConfiguration(endpointConf)
               .withCredentials(new AWSStaticCredentialsProvider(credentials))
+              .withClientConfiguration(clientConfiguration)
               .build();
     } else {
       logger.debug("Using default Amazon S3 endpoint with region " + regionName);
@@ -101,6 +108,7 @@ public class S3ContentStore extends AbstractContentStore
               .standard()
               .withRegion(regionName)
               .withCredentials(new AWSStaticCredentialsProvider(credentials))
+              .withClientConfiguration(clientConfiguration)
               .build();
     }
 
@@ -147,6 +155,10 @@ public class S3ContentStore extends AbstractContentStore
 
   public void setEndpoint(String endpoint) {
     this.endpoint = endpoint;
+  }
+
+  public void setSignatureVersion(String signatureVersion) {
+    this.signatureVersion = signatureVersion;
   }
 
   public void setRootDirectory(String rootDirectory) {
