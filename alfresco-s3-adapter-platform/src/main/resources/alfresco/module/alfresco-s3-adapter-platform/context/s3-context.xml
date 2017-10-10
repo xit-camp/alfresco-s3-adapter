@@ -88,6 +88,7 @@
     <property name="regionName" value="${aws.regionName}"/>
     <property name="rootDirectory" value="${aws.s3.rootDirectory}"/>
     <property name="endpoint" value="${aws.s3.endpoint}"/>
+    <property name="signatureVersion" value="${aws.s3.signatureVersion}"/>
   </bean>
 
 </beans>

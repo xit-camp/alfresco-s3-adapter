@@ -94,6 +94,9 @@ aws.s3.endpoint=
 # The relative path (S3 KEY) within the bucket to use as the content store (useful if the bucket is not dedicated to alfresco content)
 aws.s3.rootDirectory=/alfresco/contentstore
 
+# Signing version for s3 sdk. If empty this will be the default for the current sdk version. When working with custom s3 providers, this might have to be changed. Currently allowed values are <empty>, AWSS3V4SignerType and S3SignerType.
+aws.s3.signatureVersion=
+
 # The cache size
 defaultS3QuotaManager.maxUsageMB=4096
 # The max file size in MB to store in cache 0 means no limit
