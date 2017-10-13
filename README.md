@@ -102,9 +102,13 @@ aws.s3.client.connectionTimeout=50000
 # Connection time to live in the s3 client connection pool
 aws.s3.client.connectionTTL=60000
 # Number of retries on error in the s3 client
-aws.s3.client.maxErrorRetry
-# Disable chunked uploads. Default is false. Toggle to disable if working with endpoints which have no support for chunked uploads.
-aws.s3.client.disableChunkedUploads=false
+aws.s3.client.maxErrorRetry=5
+# Multipart upload threshold in bytes.
+# 1099511627776 = 1tb
+# 1073741824 = 1gb
+# 104857600 = 100mb
+# 16777216 = 16mb
+aws.s3.client.multipartUploadThreshold=16777216
 
 # The cache size
 defaultS3QuotaManager.maxUsageMB=4096
