@@ -89,6 +89,9 @@
     <property name="rootDirectory" value="${aws.s3.rootDirectory}"/>
     <property name="endpoint" value="${aws.s3.endpoint}"/>
     <property name="signatureVersion" value="${aws.s3.signatureVersion}"/>
+    <property name="connectionTimeout" value="${aws.s3.client.connectionTimeout}"/>
+    <property name="connectionTTL" value="${aws.s3.client.connectionTTL}"/>
+    <property name="maxErrorRetry" value="${aws.s3.client.maxErrorRetry}"/>
   </bean>
 
 </beans>
