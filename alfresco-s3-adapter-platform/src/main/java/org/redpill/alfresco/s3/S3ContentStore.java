@@ -10,6 +10,7 @@ import com.amazonaws.client.builder.AwsClientBuilder.EndpointConfiguration;
 import com.amazonaws.services.s3.AmazonS3ClientBuilder;
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.transfer.TransferManager;
+import com.amazonaws.services.s3.transfer.TransferManagerBuilder;
 import org.alfresco.repo.content.AbstractContentStore;
 import org.alfresco.repo.content.ContentStore;
 import org.alfresco.repo.content.ContentStoreCreatedEvent;
@@ -35,10 +36,15 @@ import java.util.Collections;
 import java.util.GregorianCalendar;
 import java.util.Map;
 
+/**
+ * A s3 content store
+ *
+ * @author Marcus Svartmark - Redpill Linpro
+ */
 public class S3ContentStore extends AbstractContentStore
         implements ApplicationContextAware, ApplicationListener<ApplicationEvent> {
 
-  private static final Log logger = LogFactory.getLog(S3ContentStore.class);
+  private static final Log LOG = LogFactory.getLog(S3ContentStore.class);
   private ApplicationContext applicationContext;
 
   private AmazonS3 s3Client;
@@ -65,35 +71,49 @@ public class S3ContentStore extends AbstractContentStore
 
   }
 
+  /**
+   * Get the currently used s3 client
+   *
+   * @return Returns a s3 client
+   */
   public AmazonS3 getS3Client() {
     return s3Client;
   }
 
+  /**
+   * Initialize the content store
+   */
   public void init() {
     AWSCredentials credentials = null;
     ClientConfiguration clientConfiguration = new ClientConfiguration();
     if (!StringUtils.isEmpty(signatureVersion)) {
-      logger.debug("Using client override for signatureVersion: " + signatureVersion);
+      LOG.debug("Using client override for signatureVersion: " + signatureVersion);
       clientConfiguration.setSignerOverride(signatureVersion);
     }
 
-    if (StringUtils.isNotBlank(this.accessKey) && StringUtils.isNotBlank(this.secretKey)) {
+    clientConfiguration.setConnectionTimeout(10000);
+    clientConfiguration.setMaxErrorRetry(1);
+    clientConfiguration.setConnectionTTL(60000);
+    //clientConfiguration.set
 
-      logger.debug("Found credentials in properties file");
+    if (StringUtils.isNotBlank(this.accessKey) && StringUtils.isNotBlank(this.secretKey)) {
+      LOG.debug("Found credentials in properties file");
       credentials = new BasicAWSCredentials(this.accessKey, this.secretKey);
 
     } else {
       try {
-        logger.debug("AWS Credentials not specified in properties, will fallback to credentials provider");
+        LOG.debug("AWS Credentials not specified in properties, will fallback to credentials provider");
         credentials = new ProfileCredentialsProvider().getCredentials();
       } catch (Exception e) {
-        logger.error("Can not find AWS Credentials. Trying anonymous.");
+        LOG.error("Can not find AWS Credentials. Trying anonymous.");
         credentials = new AnonymousAWSCredentials();
       }
     }
 
     if (!"".equals(endpoint)) {
-      logger.debug("Using custom endpoint" + endpoint);
+      if (LOG.isDebugEnabled()) {
+        LOG.debug("Using custom endpoint" + endpoint);
+      }
       EndpointConfiguration endpointConf = new EndpointConfiguration(endpoint, regionName);
       s3Client = AmazonS3ClientBuilder
               .standard()
@@ -102,7 +122,9 @@ public class S3ContentStore extends AbstractContentStore
               .withClientConfiguration(clientConfiguration)
               .build();
     } else {
-      logger.debug("Using default Amazon S3 endpoint with region " + regionName);
+      if (LOG.isDebugEnabled()) {
+        LOG.debug("Using default Amazon S3 endpoint with region " + regionName);
+      }
 
       s3Client = AmazonS3ClientBuilder
               .standard()
@@ -112,29 +134,39 @@ public class S3ContentStore extends AbstractContentStore
               .build();
     }
 
-    transferManager = new TransferManager(s3Client);
+    transferManager = TransferManagerBuilder.standard().withS3Client(s3Client).build();
 
   }
 
+  /**
+   * Test init method to use for local testing with findify s3 mock
+   */
   public void testInit() {
-    logger.debug("Using test init");
-    logger.debug("Using custom endpoint" + endpoint);
-    logger.debug("Using default Amazon S3 endpoint with region " + regionName);
-    /* AWS S3 client setup.
-     *  withPathStyleAccessEnabled(true) trick is required to overcome S3 default 
-     *  DNS-based bucket access scheme
-     *  resulting in attempts to connect to addresses like "bucketname.localhost"
-     *  which requires specific DNS setup.
-     */
+    if (LOG.isDebugEnabled()) {
+      LOG.debug("Using test init");
+      LOG.debug("Using custom endpoint" + endpoint);
+      LOG.debug("Using default Amazon S3 endpoint with region " + regionName);
+    }
+    ClientConfiguration clientConfiguration = new ClientConfiguration();
+    if (!StringUtils.isEmpty(signatureVersion)) {
+      if (LOG.isDebugEnabled()) {
+        LOG.debug("Using client override for signatureVersion: " + signatureVersion);
+      }
+      clientConfiguration.setSignerOverride(signatureVersion);
+    }
+
+    clientConfiguration.setMaxConnections(1);
+
     EndpointConfiguration endpointConf = new EndpointConfiguration(endpoint, regionName);
     s3Client = AmazonS3ClientBuilder
             .standard()
             .withPathStyleAccessEnabled(true)
             .withEndpointConfiguration(endpointConf)
             .withCredentials(new AWSStaticCredentialsProvider(new AnonymousAWSCredentials()))
+            .withClientConfiguration(clientConfiguration)
             .build();
 
-    transferManager = new TransferManager(s3Client);
+    transferManager = TransferManagerBuilder.standard().withS3Client(s3Client).build();
   }
 
   public void setAccessKey(String accessKey) {
@@ -191,6 +223,11 @@ public class S3ContentStore extends AbstractContentStore
 
   }
 
+  /**
+   * Create a hashed URL for storage
+   *
+   * @return Returns a string containing the URL for storage
+   */
   public static String createNewUrl() {
 
     Calendar calendar = new GregorianCalendar();
@@ -234,15 +271,15 @@ public class S3ContentStore extends AbstractContentStore
 
     try {
       String key = makeS3Key(contentUrl);
-      logger.debug("Deleting object from S3 with url: " + contentUrl + ", key: " + key);
+      if (LOG.isDebugEnabled()) {
+        LOG.debug("Deleting object from S3 with url: " + contentUrl + ", key: " + key);
+      }
       s3Client.deleteObject(bucketName, key);
       return true;
     } catch (Exception e) {
-      logger.error("Error deleting S3 Object", e);
+      LOG.error("Error deleting S3 Object", e);
     }
-
     return false;
-
   }
 
   /**
@@ -256,6 +293,7 @@ public class S3ContentStore extends AbstractContentStore
     context.publishEvent(new ContentStoreCreatedEvent(this, extendedEventParams));
   }
 
+  @Override
   public void onApplicationEvent(ApplicationEvent event) {
     // Once the context has been refreshed, we tell other interested beans about the existence of this content store
     // (e.g. for monitoring purposes)
