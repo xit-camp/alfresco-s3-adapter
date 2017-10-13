@@ -14,28 +14,33 @@ import java.nio.channels.Channels;
 import java.nio.channels.ReadableByteChannel;
 import org.alfresco.service.cmr.repository.ContentStreamListener;
 
+/**
+ * S3 Content Reader
+ *
+ * @author Marcus Svartmark
+ */
 public class S3ContentReader extends AbstractContentReader implements AutoCloseable {
 
   private static final Log LOG = LogFactory.getLog(S3ContentReader.class);
 
   private final String key;
-  private final AmazonS3 client;
-  private final String bucketName;
-  private S3Object fileObject;
-  private ObjectMetadata fileObjectMetadata;
+  private final AmazonS3 s3Client;
+  private final String bucket;
+  private S3Object s3Object;
+  private ObjectMetadata s3ObjectMetadata;
 
   /**
    * @param key the key to use when looking up data
-   * @param client the s3 client to use for the connection
+   * @param s3Client the s3 client to use for the connection
    * @param contentUrl the content URL - this should be relative to the root of
    * the store
-   * @param bucketName the s3 bucket name
+   * @param bucket the s3 bucket name
    */
-  protected S3ContentReader(String key, String contentUrl, AmazonS3 client, String bucketName) {
+  protected S3ContentReader(String key, String contentUrl, AmazonS3 s3Client, String bucket) {
     super(contentUrl);
     this.key = key;
-    this.client = client;
-    this.bucketName = bucketName;
+    this.s3Client = s3Client;
+    this.bucket = bucket;
     //Do not initialize the s3 object on reader init. Use lazy initalization
   }
 
@@ -45,12 +50,12 @@ public class S3ContentReader extends AbstractContentReader implements AutoClosea
    * @throws IOException Throws exception on error
    */
   protected void closeFileObject() throws IOException {
-    if (fileObject != null) {
+    if (s3Object != null) {
       if (LOG.isTraceEnabled()) {
         LOG.trace("Closing s3 file object for reader " + key);
       }
-      fileObject.close();
-      fileObject = null;
+      s3Object.close();
+      s3Object = null;
     }
   }
 
@@ -58,11 +63,11 @@ public class S3ContentReader extends AbstractContentReader implements AutoClosea
    * Lazy initialize the file object
    */
   protected void lazyInitFileObject() {
-    if (fileObject == null) {
+    if (s3Object == null) {
       if (LOG.isTraceEnabled()) {
-        LOG.trace("Lazy init for file object for " + bucketName + " - " + key);
+        LOG.trace("Lazy init for file object for " + bucket + " - " + key);
       }
-      this.fileObject = getObject();
+      this.s3Object = getObject();
     }
   }
 
@@ -70,25 +75,18 @@ public class S3ContentReader extends AbstractContentReader implements AutoClosea
    * Lazy initialize the file metadata
    */
   protected void lazyInitFileMetadata() {
-    if (fileObjectMetadata == null) {
+    if (s3ObjectMetadata == null) {
       if (LOG.isTraceEnabled()) {
-        LOG.trace("Lazy init for file metadata for " + bucketName + " - " + key);
+        LOG.trace("Lazy init for file metadata for " + bucket + " - " + key);
       }
-      boolean resetFileObject = false;
-      if (fileObject == null) {
-        resetFileObject = true;
-      }
-      lazyInitFileObject();
-      try {
-        try {
-          this.fileObjectMetadata = getObjectMetadata(this.fileObject);
-        } finally {
-          if (resetFileObject) {
-            closeFileObject();
-          }
+
+      if (s3Object != null) {
+        s3ObjectMetadata = s3Object.getObjectMetadata();
+      } else {
+        if (LOG.isDebugEnabled()) {
+          LOG.debug("GETTING OBJECT METADATA - BUCKET: " + bucket + " KEY: " + key);
         }
-      } catch (IOException e) {
-        throw new ContentIOException("Error fetching object metadata", e);
+        s3ObjectMetadata = s3Client.getObjectMetadata(bucket, key);
       }
     }
   }
@@ -98,7 +96,7 @@ public class S3ContentReader extends AbstractContentReader implements AutoClosea
     if (LOG.isDebugEnabled()) {
       LOG.debug("Called createReader for contentUrl -> " + getContentUrl() + ", Key: " + key);
     }
-    return new S3ContentReader(key, getContentUrl(), client, bucketName);
+    return new S3ContentReader(key, getContentUrl(), s3Client, bucket);
   }
 
   @Override
@@ -122,7 +120,7 @@ public class S3ContentReader extends AbstractContentReader implements AutoClosea
         }
       };
       this.addListener(s3StreamListener);
-      return Channels.newChannel(fileObject.getObjectContent());
+      return Channels.newChannel(s3Object.getObjectContent());
     } catch (Exception e) {
       throw new ContentIOException("Unable to retrieve content object from S3", e);
     }
@@ -132,7 +130,7 @@ public class S3ContentReader extends AbstractContentReader implements AutoClosea
   @Override
   public boolean exists() {
     lazyInitFileMetadata();
-    return fileObjectMetadata != null;
+    return s3ObjectMetadata != null;
   }
 
   @Override
@@ -142,7 +140,7 @@ public class S3ContentReader extends AbstractContentReader implements AutoClosea
       return 0L;
     }
 
-    return fileObjectMetadata.getLastModified().getTime();
+    return s3ObjectMetadata.getLastModified().getTime();
 
   }
 
@@ -153,7 +151,7 @@ public class S3ContentReader extends AbstractContentReader implements AutoClosea
       return 0L;
     }
 
-    return fileObjectMetadata.getContentLength();
+    return s3ObjectMetadata.getContentLength();
   }
 
   private S3Object getObject() {
@@ -161,25 +159,15 @@ public class S3ContentReader extends AbstractContentReader implements AutoClosea
     S3Object object = null;
 
     try {
-      LOG.debug("GETTING OBJECT - BUCKET: " + bucketName + " KEY: " + key);
-      object = client.getObject(bucketName, key);
+      if (LOG.isDebugEnabled()) {
+        LOG.debug("GETTING OBJECT - BUCKET: " + bucket + " KEY: " + key);
+      }
+      object = s3Client.getObject(bucket, key);
     } catch (Exception e) {
       LOG.error("Unable to fetch S3 Object", e);
     }
 
     return object;
-  }
-
-  private ObjectMetadata getObjectMetadata(S3Object object) {
-
-    ObjectMetadata metadata = null;
-
-    if (object != null) {
-      metadata = object.getObjectMetadata();
-    }
-
-    return metadata;
-
   }
 
   @Override

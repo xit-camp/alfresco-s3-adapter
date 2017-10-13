@@ -35,6 +35,8 @@ import java.util.Calendar;
 import java.util.Collections;
 import java.util.GregorianCalendar;
 import java.util.Map;
+import org.springframework.beans.factory.InitializingBean;
+import org.springframework.util.Assert;
 
 /**
  * A s3 content store
@@ -42,7 +44,7 @@ import java.util.Map;
  * @author Marcus Svartmark - Redpill Linpro
  */
 public class S3ContentStore extends AbstractContentStore
-        implements ApplicationContextAware, ApplicationListener<ApplicationEvent> {
+        implements ApplicationContextAware, ApplicationListener<ApplicationEvent>, InitializingBean {
 
   private static final Log LOG = LogFactory.getLog(S3ContentStore.class);
   private ApplicationContext applicationContext;
@@ -57,6 +59,33 @@ public class S3ContentStore extends AbstractContentStore
   private String rootDirectory;
   private String endpoint;
   private String signatureVersion;
+  private int connectionTimeout = 50000;
+  private int maxErrorRetry = 5;
+  private long connectionTTL = 60000;
+
+  /**
+   * @see com.amazonaws.ClientConfiguration#setConnectionTTL(long)
+   * @param connectionTTL
+   */
+  public void setConnectionTTL(long connectionTTL) {
+    this.connectionTTL = connectionTTL;
+  }
+
+  /**
+   * @see com.amazonaws.ClientConfiguration#setMaxErrorRetry(int)
+   * @param maxErrorRetry
+   */
+  public void setMaxErrorRetry(int maxErrorRetry) {
+    this.maxErrorRetry = maxErrorRetry;
+  }
+
+  /**
+   * @see com.amazonaws.ClientConfiguration#setConnectionTimeout(int)
+   * @param connectionTimeout
+   */
+  public void setConnectionTimeout(int connectionTimeout) {
+    this.connectionTimeout = connectionTimeout;
+  }
 
   @Override
   public boolean isWriteSupported() {
@@ -91,10 +120,9 @@ public class S3ContentStore extends AbstractContentStore
       clientConfiguration.setSignerOverride(signatureVersion);
     }
 
-    clientConfiguration.setConnectionTimeout(10000);
-    clientConfiguration.setMaxErrorRetry(1);
-    clientConfiguration.setConnectionTTL(60000);
-    //clientConfiguration.set
+    clientConfiguration.setConnectionTimeout(connectionTimeout);
+    clientConfiguration.setMaxErrorRetry(maxErrorRetry);
+    clientConfiguration.setConnectionTTL(connectionTTL);
 
     if (StringUtils.isNotBlank(this.accessKey) && StringUtils.isNotBlank(this.secretKey)) {
       LOG.debug("Found credentials in properties file");
@@ -155,7 +183,9 @@ public class S3ContentStore extends AbstractContentStore
       clientConfiguration.setSignerOverride(signatureVersion);
     }
 
-    clientConfiguration.setMaxConnections(1);
+    clientConfiguration.setConnectionTimeout(connectionTimeout);
+    clientConfiguration.setMaxErrorRetry(maxErrorRetry);
+    clientConfiguration.setConnectionTTL(connectionTTL);
 
     EndpointConfiguration endpointConf = new EndpointConfiguration(endpoint, regionName);
     s3Client = AmazonS3ClientBuilder
@@ -300,5 +330,21 @@ public class S3ContentStore extends AbstractContentStore
     if (event instanceof ContextRefreshedEvent && event.getSource() == this.applicationContext) {
       publishEvent(((ContextRefreshedEvent) event).getApplicationContext(), Collections.<String, Serializable>emptyMap());
     }
+  }
+
+  @Override
+  public void afterPropertiesSet() throws Exception {
+    Assert.notNull(accessKey);
+    Assert.notNull(secretKey);
+    Assert.notNull(bucketName);
+    Assert.notNull(regionName);
+    Assert.notNull(rootDirectory);
+    Assert.notNull(endpoint);
+    Assert.notNull(signatureVersion);
+    Assert.notNull(connectionTimeout);
+    Assert.notNull(connectionTTL);
+    Assert.isTrue(maxErrorRetry >= 0);
+    Assert.isTrue(connectionTTL >= 0);
+    Assert.isTrue(connectionTimeout >= 0);
   }
 }

@@ -97,6 +97,13 @@ aws.s3.rootDirectory=/alfresco/contentstore
 # Signing version for s3 sdk. If empty this will be the default for the current sdk version. When working with custom s3 providers, this might have to be changed. Currently allowed values are <empty>, AWSS3V4SignerType and S3SignerType.
 aws.s3.signatureVersion=
 
+# Connection timeout for the s3 client
+aws.s3.client.connectionTimeout=50000
+# Connection time to live in the s3 client connection pool
+aws.s3.client.connectionTTL=60000
+# Number of retries on error in the s3 client
+aws.s3.client.maxErrorRetry
+
 # The cache size
 defaultS3QuotaManager.maxUsageMB=4096
 # The max file size in MB to store in cache 0 means no limit
