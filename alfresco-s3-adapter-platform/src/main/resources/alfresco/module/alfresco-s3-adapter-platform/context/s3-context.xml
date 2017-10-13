@@ -92,6 +92,7 @@
     <property name="connectionTimeout" value="${aws.s3.client.connectionTimeout}"/>
     <property name="connectionTTL" value="${aws.s3.client.connectionTTL}"/>
     <property name="maxErrorRetry" value="${aws.s3.client.maxErrorRetry}"/>
+    <property name="disableChunkedUploads" value="${aws.s3.client.disableChunkedUploads}"/>
   </bean>
 
 </beans>

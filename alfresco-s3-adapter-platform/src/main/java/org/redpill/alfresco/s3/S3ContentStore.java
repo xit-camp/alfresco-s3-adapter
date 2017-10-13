@@ -62,10 +62,19 @@ public class S3ContentStore extends AbstractContentStore
   private int connectionTimeout = 50000;
   private int maxErrorRetry = 5;
   private long connectionTTL = 60000;
+  private boolean disableChunkedUploads = false;
+
+  /**
+   * @see AmazonS3ClientBuilder#disableChunkedEncoding()
+   * @param disableChunkedUploads toggle to disable chunked uploads
+   */
+  public void setDisableChunkedUploads(boolean disableChunkedUploads) {
+    this.disableChunkedUploads = disableChunkedUploads;
+  }
 
   /**
    * @see com.amazonaws.ClientConfiguration#setConnectionTTL(long)
-   * @param connectionTTL
+   * @param connectionTTL set TTL for connection
    */
   public void setConnectionTTL(long connectionTTL) {
     this.connectionTTL = connectionTTL;
@@ -73,7 +82,7 @@ public class S3ContentStore extends AbstractContentStore
 
   /**
    * @see com.amazonaws.ClientConfiguration#setMaxErrorRetry(int)
-   * @param maxErrorRetry
+   * @param maxErrorRetry set max retries
    */
   public void setMaxErrorRetry(int maxErrorRetry) {
     this.maxErrorRetry = maxErrorRetry;
@@ -81,7 +90,7 @@ public class S3ContentStore extends AbstractContentStore
 
   /**
    * @see com.amazonaws.ClientConfiguration#setConnectionTimeout(int)
-   * @param connectionTimeout
+   * @param connectionTimeout set connection timeout
    */
   public void setConnectionTimeout(int connectionTimeout) {
     this.connectionTimeout = connectionTimeout;
@@ -143,23 +152,34 @@ public class S3ContentStore extends AbstractContentStore
         LOG.debug("Using custom endpoint" + endpoint);
       }
       EndpointConfiguration endpointConf = new EndpointConfiguration(endpoint, regionName);
-      s3Client = AmazonS3ClientBuilder
+      AmazonS3ClientBuilder s3builder = AmazonS3ClientBuilder
               .standard()
               .withEndpointConfiguration(endpointConf)
               .withCredentials(new AWSStaticCredentialsProvider(credentials))
-              .withClientConfiguration(clientConfiguration)
-              .build();
+              .withClientConfiguration(clientConfiguration);
+      if (disableChunkedUploads) {
+        s3builder = s3builder.disableChunkedEncoding();
+      }
+
+      s3Client = s3builder.build();
+
     } else {
       if (LOG.isDebugEnabled()) {
         LOG.debug("Using default Amazon S3 endpoint with region " + regionName);
       }
 
-      s3Client = AmazonS3ClientBuilder
+      AmazonS3ClientBuilder s3builder = AmazonS3ClientBuilder
               .standard()
               .withRegion(regionName)
               .withCredentials(new AWSStaticCredentialsProvider(credentials))
-              .withClientConfiguration(clientConfiguration)
-              .build();
+              .withClientConfiguration(clientConfiguration);
+      if (disableChunkedUploads) {
+        s3builder = s3builder.disableChunkedEncoding();
+      }
+
+      s3Client = s3builder.build();
+
+      s3Client = s3builder.build();
     }
 
     transferManager = TransferManagerBuilder.standard().withS3Client(s3Client).build();
