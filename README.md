@@ -52,8 +52,18 @@ The following code snippet can be used to configure the module to work in an ent
       </map>
     </property>
   </bean>
+  
+  <!-- Tell the system to delete using the contentSelectorContentStore as well -->
+  <bean id="contentStoresToClean" class="java.util.ArrayList" >
+    <constructor-arg>
+      <list>
+        <ref bean="fileContentStore" />
+        <ref bean="redpill.defaultCachedS3BackedContentStore" />
+      </list>
+    </constructor-arg>
+  </bean>
 </beans> 
- ```
+```
  
 ### Use as a main content store
 The following code snippet can be used to configure the module to work as a caching content store backed by s3.
