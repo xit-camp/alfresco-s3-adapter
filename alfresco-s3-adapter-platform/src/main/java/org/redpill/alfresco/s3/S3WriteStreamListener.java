@@ -12,13 +12,13 @@ import java.io.File;
 /**
  * Stream listener which is used to copy the temp file contents into S3
  */
-public class S3StreamListener implements ContentStreamListener {
+public class S3WriteStreamListener implements ContentStreamListener {
 
-  private static final Log logger = LogFactory.getLog(S3StreamListener.class);
+  private static final Log LOG = LogFactory.getLog(S3WriteStreamListener.class);
 
-  private S3ContentWriter writer;
+  private final S3ContentWriter writer;
 
-  public S3StreamListener(S3ContentWriter writer) {
+  public S3WriteStreamListener(S3ContentWriter writer) {
 
     this.writer = writer;
 
@@ -31,16 +31,23 @@ public class S3StreamListener implements ContentStreamListener {
     long size = file.length();
     writer.setSize(size);
 
-    logger.debug("Writing to s3://" + writer.getBucketName() + "/" + writer.getKey());
+    if (LOG.isDebugEnabled()) {
+      LOG.debug("Writing to s3://" + writer.getBucketName() + "/" + writer.getKey());
+    }
     TransferManager transferManager = writer.getTransferManager();
 
     Upload upload = transferManager.upload(writer.getBucketName(), writer.getKey(), writer.getTempFile());
     //To have transactional consistency it is necessary to wait for the upload to go through before allowing the transaction to commit!
     try {
+      if (LOG.isTraceEnabled()) {
+        LOG.trace("Waiting for upload result for bucket " + writer.getBucketName() + " with key " + writer.getKey());
+      }
       upload.waitForUploadResult();
-
+      if (LOG.isTraceEnabled()) {
+        LOG.trace("Upload completed for bucket " + writer.getBucketName() + " with key " + writer.getKey());
+      }
     } catch (Exception e) {
-      throw new ContentIOException("S3StreamListener Failed to Upload File", e);
+      throw new ContentIOException("S3WriterStreamListener Failed to Upload File for bucket " + writer.getBucketName() + " with key " + writer.getKey(), e);
     } finally {
       //Remove the temp file
       writer.getTempFile().delete();
