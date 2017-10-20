@@ -7,3 +7,6 @@ target
 /java_cacerts
 *.log
 *.log*
+.settings
+.project
+.classpath

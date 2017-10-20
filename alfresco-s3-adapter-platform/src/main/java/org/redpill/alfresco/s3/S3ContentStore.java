@@ -140,10 +140,12 @@ public class S3ContentStore extends AbstractContentStore
       
     } else {
       try {
-        LOG.debug("AWS Credentials not specified in properties, will fallback to credentials provider");
+        if (LOG.isDebugEnabled()){
+          LOG.debug("AWS Credentials not specified in properties, will fallback to credentials provider");
+        }
         credentials = new ProfileCredentialsProvider().getCredentials();
       } catch (Exception e) {
-        LOG.error("Can not find AWS Credentials. Trying anonymous.");
+        LOG.error("Can not find AWS Credentials. Trying anonymous.", e);
         credentials = new AnonymousAWSCredentials();
       }
     }

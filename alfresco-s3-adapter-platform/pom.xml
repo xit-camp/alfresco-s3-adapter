@@ -3,14 +3,13 @@
   <modelVersion>4.0.0</modelVersion>
   <artifactId>alfresco-s3-adapter-platform</artifactId>
   <name>Alfresco S3 Adapter - Platform/Repository Module</name>
-  <description>Platform/Repo JAR Module (to be included in the alfresco.war) - part of AIO - SDK 3
-  </description>
+  <description>Alfresco S3 Adapter - Platform/Repository Module</description>
   <packaging>jar</packaging>
 
   <parent>
     <groupId>org.redpill-linpro.alfresco.s3</groupId>
     <artifactId>alfresco-s3-adapter</artifactId>
-    <version>1.1.2</version>
+    <version>1.1.3</version>
   </parent>
 
   <properties>
