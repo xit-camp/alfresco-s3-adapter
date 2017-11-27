@@ -45,13 +45,13 @@ import org.springframework.util.Assert;
  */
 public class S3ContentStore extends AbstractContentStore
         implements ApplicationContextAware, ApplicationListener<ApplicationEvent>, InitializingBean {
-  
+
   private static final Log LOG = LogFactory.getLog(S3ContentStore.class);
   private ApplicationContext applicationContext;
-  
+
   private AmazonS3 s3Client;
   private TransferManager transferManager;
-  
+
   private String accessKey;
   private String secretKey;
   private String bucketName;
@@ -96,18 +96,18 @@ public class S3ContentStore extends AbstractContentStore
   public void setConnectionTimeout(int connectionTimeout) {
     this.connectionTimeout = connectionTimeout;
   }
-  
+
   @Override
   public boolean isWriteSupported() {
     return true;
   }
-  
+
   @Override
   public ContentReader getReader(String contentUrl) {
-    
+
     String key = makeS3Key(contentUrl);
     return new S3ContentReader(key, contentUrl, s3Client, bucketName);
-    
+
   }
 
   /**
@@ -129,18 +129,18 @@ public class S3ContentStore extends AbstractContentStore
       LOG.debug("Using client override for signatureVersion: " + signatureVersion);
       clientConfiguration.setSignerOverride(signatureVersion);
     }
-    
+
     clientConfiguration.setConnectionTimeout(connectionTimeout);
     clientConfiguration.setMaxErrorRetry(maxErrorRetry);
     clientConfiguration.setConnectionTTL(connectionTTL);
-    
+
     if (StringUtils.isNotBlank(this.accessKey) && StringUtils.isNotBlank(this.secretKey)) {
       LOG.debug("Found credentials in properties file");
       credentials = new BasicAWSCredentials(this.accessKey, this.secretKey);
-      
+
     } else {
       try {
-        if (LOG.isDebugEnabled()){
+        if (LOG.isDebugEnabled()) {
           LOG.debug("AWS Credentials not specified in properties, will fallback to credentials provider");
         }
         credentials = new ProfileCredentialsProvider().getCredentials();
@@ -149,7 +149,7 @@ public class S3ContentStore extends AbstractContentStore
         credentials = new AnonymousAWSCredentials();
       }
     }
-    
+
     if (!"".equals(endpoint)) {
       if (LOG.isDebugEnabled()) {
         LOG.debug("Using custom endpoint" + endpoint);
@@ -161,12 +161,12 @@ public class S3ContentStore extends AbstractContentStore
               .withCredentials(new AWSStaticCredentialsProvider(credentials))
               .withClientConfiguration(clientConfiguration);
       s3Client = s3builder.build();
-      
+
     } else {
       if (LOG.isDebugEnabled()) {
         LOG.debug("Using default Amazon S3 endpoint with region " + regionName);
       }
-      
+
       AmazonS3ClientBuilder s3builder = AmazonS3ClientBuilder
               .standard()
               .withRegion(regionName)
@@ -174,7 +174,7 @@ public class S3ContentStore extends AbstractContentStore
               .withClientConfiguration(clientConfiguration);
       s3Client = s3builder.build();
     }
-    
+
     transferManager = TransferManagerBuilder
             .standard()
             .withS3Client(s3Client)
@@ -198,11 +198,11 @@ public class S3ContentStore extends AbstractContentStore
       }
       clientConfiguration.setSignerOverride(signatureVersion);
     }
-    
+
     clientConfiguration.setConnectionTimeout(connectionTimeout);
     clientConfiguration.setMaxErrorRetry(maxErrorRetry);
     clientConfiguration.setConnectionTTL(connectionTTL);
-    
+
     EndpointConfiguration endpointConf = new EndpointConfiguration(endpoint, regionName);
     s3Client = AmazonS3ClientBuilder
             .standard()
@@ -211,62 +211,62 @@ public class S3ContentStore extends AbstractContentStore
             .withCredentials(new AWSStaticCredentialsProvider(new AnonymousAWSCredentials()))
             .withClientConfiguration(clientConfiguration)
             .build();
-    
+
     transferManager = TransferManagerBuilder.standard().withS3Client(s3Client).build();
   }
-  
+
   public void setAccessKey(String accessKey) {
     this.accessKey = accessKey;
   }
-  
+
   public void setSecretKey(String secretKey) {
     this.secretKey = secretKey;
   }
-  
+
   public void setBucketName(String bucketName) {
     this.bucketName = bucketName;
   }
-  
+
   public void setRegionName(String regionName) {
     this.regionName = regionName;
   }
-  
+
   public void setEndpoint(String endpoint) {
     this.endpoint = endpoint;
   }
-  
+
   public void setSignatureVersion(String signatureVersion) {
     this.signatureVersion = signatureVersion;
   }
-  
+
   public void setRootDirectory(String rootDirectory) {
-    
+
     String dir = rootDirectory;
     if (dir.startsWith("/")) {
       dir = dir.substring(1);
     }
-    
+
     this.rootDirectory = dir;
   }
-  
+
   @Override
   public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
     this.applicationContext = applicationContext;
   }
-  
+
   @Override
   protected ContentWriter getWriterInternal(ContentReader existingContentReader, String newContentUrl) {
-    
+
     String contentUrl = newContentUrl;
-    
+
     if (StringUtils.isBlank(contentUrl)) {
       contentUrl = createNewUrl();
     }
-    
+
     String key = makeS3Key(contentUrl);
-    
+
     return new S3ContentWriter(bucketName, key, contentUrl, existingContentReader, s3Client, transferManager);
-    
+
   }
 
   /**
@@ -275,7 +275,7 @@ public class S3ContentStore extends AbstractContentStore
    * @return Returns a string containing the URL for storage
    */
   public static String createNewUrl() {
-    
+
     Calendar calendar = new GregorianCalendar();
     int year = calendar.get(Calendar.YEAR);
     int month = calendar.get(Calendar.MONTH) + 1;  // 0-based
@@ -295,9 +295,9 @@ public class S3ContentStore extends AbstractContentStore
     String newContentUrl = sb.toString();
     // done
     return newContentUrl;
-    
+
   }
-  
+
   private String makeS3Key(String contentUrl) {
     // take just the part after the protocol
     Pair<String, String> urlParts = super.getContentUrlParts(contentUrl);
@@ -307,23 +307,25 @@ public class S3ContentStore extends AbstractContentStore
     if (!protocol.equals(FileContentStore.STORE_PROTOCOL)) {
       throw new UnsupportedContentUrlException(this, protocol + PROTOCOL_DELIMITER + relativePath);
     }
-    
+
     return rootDirectory + "/" + relativePath;
-    
+
   }
-  
+
   @Override
   public boolean delete(String contentUrl) {
-    
+
     try {
       String key = makeS3Key(contentUrl);
-      if (LOG.isDebugEnabled()) {
-        LOG.debug("Deleting object from S3 with url: " + contentUrl + ", key: " + key);
+      if (LOG.isTraceEnabled()) {
+        LOG.trace("Deleting object from S3 with url: " + contentUrl + ", key: " + key);
       }
       s3Client.deleteObject(bucketName, key);
       return true;
     } catch (Exception e) {
-      LOG.error("Error deleting S3 Object", e);
+      if (LOG.isTraceEnabled()) {
+        LOG.trace("Error deleting S3 Object", e);
+      }
     }
     return false;
   }
@@ -338,7 +340,7 @@ public class S3ContentStore extends AbstractContentStore
   private void publishEvent(ApplicationContext context, Map<String, Serializable> extendedEventParams) {
     context.publishEvent(new ContentStoreCreatedEvent(this, extendedEventParams));
   }
-  
+
   @Override
   public void onApplicationEvent(ApplicationEvent event) {
     // Once the context has been refreshed, we tell other interested beans about the existence of this content store
@@ -347,7 +349,7 @@ public class S3ContentStore extends AbstractContentStore
       publishEvent(((ContextRefreshedEvent) event).getApplicationContext(), Collections.<String, Serializable>emptyMap());
     }
   }
-  
+
   @Override
   public void afterPropertiesSet() throws Exception {
     Assert.notNull(accessKey);
