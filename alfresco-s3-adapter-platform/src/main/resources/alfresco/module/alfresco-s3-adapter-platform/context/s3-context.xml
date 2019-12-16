@@ -18,7 +18,6 @@
 <!DOCTYPE beans PUBLIC '-//SPRING//DTD BEAN//EN' 'http://www.springframework.org/dtd/spring-beans.dtd'>
 
 <beans>
-  
   <!--  Caching Content Store -->
   <bean id="redpill.defaultCachedS3BackedContentStore" class="org.alfresco.repo.content.caching.CachingContentStore" init-method="init">
     <property name="backingStore" ref="redpill.defaultS3ContentStore"/>
@@ -45,11 +44,9 @@
     <property name="cache" ref="redpill.defaultS3ContentCache"/>
     <property name="cleaner" ref="redpill.defaultS3CachedContentCleaner"/>
   </bean>
-  
-  <bean id="redpill.defaultS3CachingContentStoreCleanerJobDetail" class="org.springframework.scheduling.quartz.JobDetailBean">
-    <property name="jobClass">
-      <value>org.alfresco.repo.content.caching.cleanup.CachedContentCleanupJob</value>
-    </property>
+
+  <bean id="redpill.defaultS3CachingContentStoreCleanerJobDetail" class="org.springframework.scheduling.quartz.JobDetailFactoryBean">
+    <property name="jobClass" value="org.alfresco.repo.content.caching.cleanup.CachedContentCleanupJob" />
     <property name="jobDataAsMap">
       <map>
         <entry key="cachedContentCleaner">
@@ -68,15 +65,15 @@
     <property name="usageTracker" ref="redpill.defaultS3QuotaManager"/>
   </bean>
 
-  <bean id="redpill.defaultS3CachingContentStoreCleanerTrigger" class="org.alfresco.util.CronTriggerBean">
-    <property name="jobDetail">
-      <ref bean="redpill.defaultS3CachingContentStoreCleanerJobDetail" />
-    </property>
-    <property name="scheduler">
-      <ref bean="schedulerFactory" />
-    </property>
-    <property name="cronExpression">
-      <value>${system.content.caching.contentCleanup.cronExpression}</value>
+  <bean id="redpill.defaultS3CachingContentStoreCleanerTrigger" class="org.alfresco.schedule.AlfrescoSchedulerAccessorBean">
+    <property name="scheduler" ref="schedulerFactory" />
+    <property name="triggers">
+      <list>
+        <bean id="rl.archive.reindexNodesTrigger" class="org.springframework.scheduling.quartz.CronTriggerFactoryBean">
+          <property name="cronExpression" value="${system.content.caching.contentCleanup.cronExpression}" />
+          <property name="jobDetail" ref="redpill.defaultS3CachingContentStoreCleanerJobDetail" />
+        </bean>
+      </list>
     </property>
   </bean>
 

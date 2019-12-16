@@ -28,7 +28,7 @@ The following code snippet can be used to configure the module to work in an ent
 <beans xmlns="http://www.springframework.org/schema/beans"
        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
        xsi:schemaLocation="http://www.springframework.org/schema/beans
-          http://www.springframework.org/schema/beans/spring-beans-3.0.xsd">
+          http://www.springframework.org/schema/beans/spring-beans.xsd">
   <!-- Change the default store to a content store selector-->
   <bean id="contentService" parent="baseContentService">
     <property name="store">
@@ -70,7 +70,7 @@ The following code snippet can be used to configure the module to work as a cach
 
 ```
 <?xml version='1.0' encoding='UTF-8'?>
-<beans xmlns="http://www.springframework.org/schema/beans" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.0.xsd">
+<beans xmlns="http://www.springframework.org/schema/beans" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
   <!--  Caching Content Store -->
   <bean id="fileContentStore" class="org.alfresco.repo.content.caching.CachingContentStore" init-method="init">
     <property name="backingStore" ref="redpill.defaultS3ContentStore"/>
