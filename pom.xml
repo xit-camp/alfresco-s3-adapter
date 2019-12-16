@@ -516,7 +516,6 @@
     <module>alfresco-s3-adapter-platform</module>
     <module>alfresco-s3-adapter-share</module>
     <module>alfresco-s3-adapter-testdeps</module>
-    <module>alfresco-s3-adapter-testdeps</module>
     <module>integration-tests</module>
     <module>alfresco-s3-adapter-platform-docker</module>
     <module>alfresco-s3-adapter-share-docker</module>
