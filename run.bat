@@ -106,7 +106,7 @@ EXIT /B 0
 :build_acs
     docker-compose -f "%COMPOSE_FILE_PATH%" kill alfresco-test-acs
     docker-compose -f "%COMPOSE_FILE_PATH%" rm -f alfresco-test-acs
-	call %MVN_EXEC% clean package -pl alfresco-test-integration-tests,alfresco-test-platform,alfresco-test-platform-docker
+	call %MVN_EXEC% clean package -pl integration-tests,alfresco-s3-adapter-platform,alfresco-s3-adapter-platform-docker,alfresco-s3-adapter-testdeps
 EXIT /B 0
 :tail
     docker-compose -f "%COMPOSE_FILE_PATH%" logs -f
@@ -115,10 +115,10 @@ EXIT /B 0
     docker-compose -f "%COMPOSE_FILE_PATH%" logs --tail="all"
 EXIT /B 0
 :prepare-test
-    call %MVN_EXEC% verify -DskipTests=true -pl alfresco-test-platform,alfresco-test-integration-tests,alfresco-test-platform-docker
+    call %MVN_EXEC% verify -DskipTests=true -pl alfresco-s3-adapter-platform,integration-tests,alfresco-s3-adapter-testdeps,alfresco-s3-adapter-platform-docker
 EXIT /B 0
 :test
-    call %MVN_EXEC% verify -pl alfresco-test-platform,alfresco-test-integration-tests
+    call %MVN_EXEC% verify -pl alfresco-s3-adapter-platform,integration-tests,alfresco-s3-adapter-testdeps
 EXIT /B 0
 :purge
     docker volume rm -f alfresco-test-acs-volume
