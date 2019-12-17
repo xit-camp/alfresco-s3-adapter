@@ -11,9 +11,47 @@ This project is meant to provide tools to use s3 as a storage solution for Alfre
  * Pull Requests / Issues / Contributions are welcomed!
  * Use Findify s3mock for testing
  
-## Build Instructions
+# Alfresco AIO Project - SDK 4.0
 
- * After cloning the project, run `mvn clean install` to download dependencies and build the project.
+This is an All-In-One (AIO) project for Alfresco SDK 4.0.
+
+Run with `./run.sh build_start` or `./run.bat build_start` and verify that it
+
+ * Runs Alfresco Content Service (ACS)
+ * Runs Alfresco Share
+ * Runs Alfresco Search Service (ASS)
+ * Runs PostgreSQL database
+ * Deploys the JAR assembled modules
+ 
+All the services of the project are now run as docker containers. The run script offers the next tasks:
+
+ * `build_start`. Build the whole project, recreate the ACS and Share docker images, start the dockerised environment composed by ACS, Share, ASS and 
+ PostgreSQL and tail the logs of all the containers.
+ * `build_start_it_supported`. Build the whole project including dependencies required for IT execution, recreate the ACS and Share docker images, start the 
+ dockerised environment composed by ACS, Share, ASS and PostgreSQL and tail the logs of all the containers.
+ * `start`. Start the dockerised environment without building the project and tail the logs of all the containers.
+ * `stop`. Stop the dockerised environment.
+ * `purge`. Stop the dockerised container and delete all the persistent data (docker volumes).
+ * `tail`. Tail the logs of all the containers.
+ * `reload_share`. Build the Share module, recreate the Share docker image and restart the Share container.
+ * `reload_acs`. Build the ACS module, recreate the ACS docker image and restart the ACS container.
+ * `build_test`. Build the whole project, recreate the ACS and Share docker images, start the dockerised environment, execute the integration tests from the
+ `integration-tests` module and stop the environment.
+ * `test`. Execute the integration tests (the environment must be already started).
+
+# Few things to notice
+
+ * No parent pom
+ * No WAR projects, the jars are included in the custom docker images
+ * No runner project - the Alfresco environment is now managed through [Docker](https://www.docker.com/)
+ * Standard JAR packaging and layout
+ * Works seamlessly with Eclipse and IntelliJ IDEA
+ * JRebel for hot reloading, JRebel maven plugin for generating rebel.xml [JRebel integration documentation]
+ * AMP as an assembly
+ * Persistent test data through restart thanks to the use of Docker volumes for ACS, ASS and database data
+ * Integration tests module to execute tests against the final environment (dockerised)
+ * Resources loaded from META-INF
+ * Web Fragment (this includes a sample servlet configured via web fragment)
 
 ## Installation
 
@@ -28,7 +66,7 @@ The following code snippet can be used to configure the module to work in an ent
 <beans xmlns="http://www.springframework.org/schema/beans"
        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
        xsi:schemaLocation="http://www.springframework.org/schema/beans
-          http://www.springframework.org/schema/beans/spring-beans-3.0.xsd">
+          http://www.springframework.org/schema/beans/spring-beans.xsd">
   <!-- Change the default store to a content store selector-->
   <bean id="contentService" parent="baseContentService">
     <property name="store">
@@ -70,7 +108,7 @@ The following code snippet can be used to configure the module to work as a cach
 
 ```
 <?xml version='1.0' encoding='UTF-8'?>
-<beans xmlns="http://www.springframework.org/schema/beans" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.0.xsd">
+<beans xmlns="http://www.springframework.org/schema/beans" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
   <!--  Caching Content Store -->
   <bean id="fileContentStore" class="org.alfresco.repo.content.caching.CachingContentStore" init-method="init">
     <property name="backingStore" ref="redpill.defaultS3ContentStore"/>
