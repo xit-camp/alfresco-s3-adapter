@@ -11,7 +11,7 @@
   <parent>
     <groupId>org.redpill-linpro.alfresco.s3</groupId>
     <artifactId>alfresco-s3-adapter</artifactId>
-    <version>1.1.4</version>
+    <version>1.2.0</version>
   </parent>
 
   <properties>
@@ -22,12 +22,24 @@
     that is generated for the AIO project -->
     <dependency>
       <groupId>org.redpill-linpro.alfresco.s3</groupId>
+      <artifactId>alfresco-s3-adapter-testdeps</artifactId>
+      <version>${project.version}</version>
+      <scope>test</scope>
+    </dependency>
+
+    <dependency>
+      <groupId>org.redpill-linpro.alfresco.s3</groupId>
       <artifactId>alfresco-s3-adapter-platform</artifactId>
       <version>${project.version}</version>
       <scope>test</scope>
     </dependency>
-        
-        
+
+    <dependency>
+      <groupId>org.redpill-linpro.alfresco</groupId>
+      <artifactId>alfresco-test-platform</artifactId>
+      <version>4.0.0</version>
+    </dependency>
+
     <dependency>
       <groupId>org.redpill-linpro.alfresco</groupId>
       <artifactId>alfresco-test-repo</artifactId>
@@ -45,7 +57,7 @@
     <dependency>
       <groupId>io.findify</groupId>
       <artifactId>s3mock_2.12</artifactId>
-      <version>0.2.3</version>
+      <version>0.2.5</version>
       <scope>test</scope>
     </dependency>
 
@@ -74,7 +86,6 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-jar-plugin</artifactId>
-        <version>3.0.2</version>
         <executions>
           <execution>
             <goals>
@@ -89,46 +100,11 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-failsafe-plugin</artifactId>
-        <version>2.19.1</version>
-        <executions>
-          <execution>
-            <id>integration-test</id>
-            <phase>integration-test</phase>
-            <goals>
-              <goal>integration-test</goal>
-            </goals>
-          </execution>
-          <execution>
-            <id>verify-test</id>
-            <phase>verify</phase>
-            <goals>
-              <goal>verify</goal>
-            </goals>
-          </execution>
-        </executions>
-        <dependencies>
-          <dependency>
-            <groupId>org.apache.maven.surefire</groupId>
-            <artifactId>surefire-junit47</artifactId>
-            <version>2.19.1</version>
-          </dependency>
-        </dependencies>
-      </plugin>
-
-      <!-- Run Alfresco Tomcat embedded -->
-      <plugin>
-        <groupId>org.alfresco.maven.plugin</groupId>
-        <artifactId>alfresco-maven-plugin</artifactId>
-        <version>${alfresco.sdk.version}</version>
-        <executions>
-          <execution>
-            <id>start-alfresco</id>
-            <goals>
-              <goal>it</goal>
-            </goals>
-            <phase>pre-integration-test</phase>
-          </execution>
-        </executions>
+        <configuration>
+          <systemPropertyVariables>
+            <acs.endpoint.path>${test.acs.endpoint.path}</acs.endpoint.path>
+          </systemPropertyVariables>
+        </configuration>
       </plugin>
     </plugins>
   </build>
