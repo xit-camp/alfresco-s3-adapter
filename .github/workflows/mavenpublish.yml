@@ -40,6 +40,7 @@ jobs:
         echo "<server><id>github-alfresco-base</id><username>$(echo "$GITHUB_REPOSITORY" | awk -F / '{print $1}')</username><password>\${env.GITHUB_TOKEN}</password></server>" >> ~/.m2/settings.xml
         echo "<server><id>github-alfresco-test</id><username>$(echo "$GITHUB_REPOSITORY" | awk -F / '{print $1}')</username><password>\${env.GITHUB_TOKEN}</password></server>" >> ~/.m2/settings.xml
         echo "</servers></settings>" >> ~/.m2/settings.xml
+        cat ~/.m2/settings.xml
         mvn -Dmaven.test.skip -B package --file pom.xml
 
     - name: Publish to GitHub Packages Apache Maven
