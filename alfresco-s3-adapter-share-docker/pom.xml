@@ -20,7 +20,7 @@
         <dependency>
             <groupId>org.redpill-linpro.alfresco.s3</groupId>
             <artifactId>alfresco-s3-adapter-share</artifactId>
-            <version>1.2.1</version>
+            <version>1.2.1.xit-SNAPSHOT</version>
         </dependency>
     </dependencies>
 
