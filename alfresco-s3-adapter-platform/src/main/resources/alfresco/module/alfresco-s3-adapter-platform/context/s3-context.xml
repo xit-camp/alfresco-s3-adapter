@@ -19,7 +19,8 @@
 
 <beans>
   <!--  Caching Content Store -->
-  <bean id="redpill.defaultCachedS3BackedContentStore" class="org.alfresco.repo.content.caching.CachingContentStore" init-method="init">
+  <!--bean id="redpill.defaultCachedS3BackedContentStore" class="org.alfresco.repo.content.caching.CachingContentStore" init-method="init" -->
+  <bean id="fileContentStore" class="org.alfresco.repo.content.caching.CachingContentStore" init-method="init">
     <property name="backingStore" ref="redpill.defaultS3ContentStore"/>
     <property name="cache" ref="redpill.defaultS3ContentCache"/>
     <property name="cacheOnInbound" value="${system.content.caching.cacheOnInbound}"/>

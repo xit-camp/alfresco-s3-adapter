@@ -53,6 +53,13 @@
          used by the customization.
     -->
     <dependencySets>
+    <!-- <dependencySet>
+      <excludes>
+        <exclude>commons-lang:commons-lang</exclude>
+        <exclude>log4j:log4j</exclude>
+      </excludes>
+    </dependencySet> -->
+
         <dependencySet>
             <outputDirectory>lib</outputDirectory>
         </dependencySet>

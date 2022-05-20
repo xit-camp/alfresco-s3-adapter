@@ -1,41 +1,63 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
-  <modelVersion>4.0.0</modelVersion>
-  <artifactId>alfresco-s3-adapter-platform</artifactId>
-  <name>Alfresco S3 Adapter - Platform/Repository Module</name>
-  <description>Alfresco S3 Adapter - Platform/Repository Module</description>
-  <packaging>jar</packaging>
+    <modelVersion>4.0.0</modelVersion>
+    <artifactId>alfresco-s3-adapter-platform</artifactId>
+    <name>Alfresco S3 Adapter - Platform/Repository Module</name>
+    <description>Alfresco S3 Adapter - Platform/Repository Module</description>
+    <packaging>jar</packaging>
 
-  <parent>
-    <groupId>org.redpill-linpro.alfresco.s3</groupId>
-    <artifactId>alfresco-s3-adapter</artifactId>
-    <version>1.2.1</version>
-  </parent>
+    <parent>
+        <groupId>org.redpill-linpro.alfresco.s3</groupId>
+        <artifactId>alfresco-s3-adapter</artifactId>
+        <version>1.2.1</version>
+    </parent>
 
-  <properties>
-  </properties>
+    <dependencies>
+        <dependency>
+            <groupId>com.amazonaws</groupId>
+            <artifactId>aws-java-sdk-s3</artifactId>
+            <version>1.12.222</version>
+        </dependency>
+        <dependency>
+            <groupId>${alfresco.groupId}</groupId>
+            <artifactId>alfresco-repository</artifactId>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-context</artifactId>
+            <scope>provided</scope>
+        </dependency>
+    </dependencies>
 
-  <dependencies>
-    <!-- aws sdk -->
-    <dependency>
-      <groupId>com.amazonaws</groupId>
-      <artifactId>aws-java-sdk-s3</artifactId>
-      <version>1.11.195</version>
-    </dependency>
-    <dependency>
-      <groupId>org.springframework</groupId>
-      <artifactId>spring-context</artifactId>
-      <scope>provided</scope>
-    </dependency>
-  </dependencies>
-
-  <build>
-    <plugins>
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-assembly-plugin</artifactId>
-      </plugin>
-    </plugins>
-  </build>
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-assembly-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>build-amp-file</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>single</goal>
+                        </goals>
+                        <configuration>
+                            <descriptors>
+                                <descriptor>src/main/assembly/amp.xml</descriptor>
+                            </descriptors>
+                        </configuration>
+                    </execution>
+                </executions>
+                <dependencies>
+                    <dependency>
+                        <groupId>org.alfresco.maven.plugin</groupId>
+                        <artifactId>alfresco-maven-plugin</artifactId>
+                        <version>${alfresco.sdk.version}</version>
+                    </dependency>
+                </dependencies>
+            </plugin>
+        </plugins>
+    </build>
 
 </project>

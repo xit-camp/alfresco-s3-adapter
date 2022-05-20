@@ -24,7 +24,7 @@
     <!-- JRebel Hot reloading of classpath stuff and web resource stuff -->
     <jrebel.version>1.1.8</jrebel.version>
 
-    <rl.alfresco-test.version>3.0.1</rl.alfresco-test.version>
+    <rl.alfresco-test.version>4.0.0</rl.alfresco-test.version>
 
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 

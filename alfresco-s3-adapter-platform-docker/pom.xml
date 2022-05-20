@@ -27,7 +27,7 @@
             <artifactId>integration-tests</artifactId>
             <version>1.2.1</version>
             <scope>test</scope>
-            <classifier>tests</classifier>
+            <!--classifier>tests</classifier-->
         </dependency>
         <dependency>
             <groupId>org.redpill-linpro.alfresco.s3</groupId>

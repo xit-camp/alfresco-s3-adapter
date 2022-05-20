@@ -157,6 +157,7 @@ public class S3ContentStore extends AbstractContentStore
       EndpointConfiguration endpointConf = new EndpointConfiguration(endpoint, regionName);
       AmazonS3ClientBuilder s3builder = AmazonS3ClientBuilder
               .standard()
+              .withPathStyleAccessEnabled(true)
               .withEndpointConfiguration(endpointConf)
               .withCredentials(new AWSStaticCredentialsProvider(credentials))
               .withClientConfiguration(clientConfiguration);
@@ -169,6 +170,7 @@ public class S3ContentStore extends AbstractContentStore
 
       AmazonS3ClientBuilder s3builder = AmazonS3ClientBuilder
               .standard()
+              .withPathStyleAccessEnabled(true)
               .withRegion(regionName)
               .withCredentials(new AWSStaticCredentialsProvider(credentials))
               .withClientConfiguration(clientConfiguration);
