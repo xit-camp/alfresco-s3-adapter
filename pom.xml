@@ -472,6 +472,20 @@
     -->
   <repositories>
     <repository>
+      <id>github-alfresco-base</id>
+      <url>https://maven.pkg.github.com/xit-camp/alfresco-base</url>
+      <snapshots>
+        <enabled>true</enabled>
+      </snapshots>
+    </repository>
+    <repository>
+      <id>github-alfresco-test</id>
+      <url>https://maven.pkg.github.com/xit-camp/alfresco-test</url>
+      <snapshots>
+        <enabled>true</enabled>
+      </snapshots>
+    </repository>
+    <repository>
       <id>redpill-linpro</id>
       <url>https://maven.redpill-linpro.com/nexus/content/groups/public</url>
       <snapshots>
